@@ -2,7 +2,7 @@
 // ⚠️ IMPORTANT: Replace with your actual Supabase keys ⚠️
 // =======================================================
 const SUPABASE_URL = 'https://etsdmkuabdxuhbpqrlqj.supabase.co'; // VÉRIFIEZ ET RÉINSÉREZ VOTRE URL SUPABASE ICI
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0c2Rta3VhYmR4dWhicHFybHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxODM1MDcsImexb3iIjoiMjA2NTc1OTUwN30.ePtphegvMJppdXdIVlk383q-Rz7rcOQoKFolRwcPPxM'; // VÉRIFIEZ ET RÉINSÉREZ VOTRE CLÉ ANONYME SUPABASE ICI
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0c2Rta3VhYmR4dWhicHFybHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxODM1MDcsImV4cCI6MjA2NTc1OTUwN30.ePtphegvMJppdXdIVlk383q-Rz7rcOQoKFolRwcPPdM'; // VÉRIFIEZ ET RÉINSÉREZ VOTRE CLÉ ANONYME SUPABASE ICI
 
 let supabaseClient;
 // =======================================================
