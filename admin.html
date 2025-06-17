@@ -4,48 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friends Location - Tableau de Bord Admin</title>
-    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="style.css"> <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-
-    <div id="admin-dashboard">
-        <h1><i class="fas fa-cogs"></i> Tableau de Bord Admin - Réservations</h1>
-
-        <div class="dashboard-controls">
-            <label for="filterStatus">Filtrer par statut:</label>
-            <select id="filterStatus">
-                <option value="all">Tous</option>
-                <option value="pending_confirmation">En attente de confirmation</option>
-                <option value="confirmed">Confirmé</option>
-                <option value="cancelled">Annulé</option>
-            </select>
-            <button id="refreshBookingsBtn"><i class="fas fa-sync-alt"></i> Rafraîchir</button>
+    <header>
+        <div class="container">
+            <h1>Friends Location - Administration</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Voir l'application client</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-        <div id="loadingIndicator" class="loading-spinner" style="display: none;">
-            <i class="fas fa-spinner fa-spin"></i> Chargement des réservations...
-        </div>
+    <main class="container admin-container">
+        <section class="admin-panel" id="adminPanel">
+            <h2>Gestion des Réservations et Véhicules</h2>
 
-        <div id="bookingsList">
-            <div class="message info" id="initialMessage">
-                Sélectionnez un filtre ou cliquez sur "Rafraîchir" pour voir les réservations.
+            <div class="filter-controls">
+                <input type="date" id="filterDate" title="Filtrer par date">
+                <select id="filterStatus" title="Filtrer par statut">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending_confirmation">En attente</option>
+                    <option value="confirmed">Confirmée</option>
+                    <option value="canceled">Annulée</option>
+                    <option value="completed">Terminée</option>
+                </select>
+                <button id="resetFiltersBtn">Réinitialiser les filtres</button>
+            </div>
+
+            <div class="button-group">
+                <button id="addVehicleBtn" class="action-btn add-btn">Ajouter un nouveau véhicule</button>
+                <button id="printReportBtn" class="action-btn print-btn"><i class="fas fa-print"></i> Imprimer le rapport</button>
+            </div>
+
+            <div id="totalRevenueSection" class="revenue-summary">
+                <h3>Revenu Total des Locations Terminées/Confirmées : <span id="totalConfirmedRevenue">0 DA</span></h3>
+            </div>
+
+
+            <h3>Liste des Réservations</h3>
+            <div id="loadingReservations" class="loading-indicator" style="display: none;">Chargement des réservations...</div>
+            <div id="reservationList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Réservation</th>
+                            <th>Véhicule</th>
+                            <th>Client</th>
+                            <th>Email Client</th>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Jours</th>
+                            <th>Prix Total</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationsTableBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <h3>Liste des Véhicules</h3>
+            <div id="loadingVehicles" class="loading-indicator" style="display: none;">Chargement des véhicules...</div>
+            <div id="vehicleList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Marque</th>
+                            <th>Modèle</th>
+                            <th>Plaque</th>
+                            <th>Type</th>
+                            <th>Prix/Jour</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehiclesTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div id="vehicleModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="modalTitle">Ajouter/Modifier Véhicule</h2>
+                <form id="vehicleForm">
+                    <input type="hidden" id="vehicleId">
+                    <label for="brand">Marque:</label>
+                    <input type="text" id="brand" required>
+                    <label for="model">Modèle:</label>
+                    <input type="text" id="model" required>
+                    <label for="licensePlate">Plaque d'Immatriculation:</label>
+                    <input type="text" id="licensePlate" required>
+                    <label for="type">Type:</label>
+                    <input type="text" id="type" required>
+                    <label for="dailyPrice">Prix Journalier:</label>
+                    <input type="number" id="dailyPrice" step="any" required>
+                    <label for="status">Statut:</label>
+                    <select id="status" required>
+                        <option value="available">Disponible</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="rented">Loué</option>
+                    </select>
+                    <button type="submit" class="submit-btn">Enregistrer</button>
+                </form>
             </div>
         </div>
-    </div>
 
-    <div id="actionModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeActionModal()">&times;</span>
-            <h2 id="actionModalTitle">Confirmation d'Action</h2>
-            <p id="actionModalMessage"></p>
-            <div class="modal-buttons">
-                <button id="confirmActionButton" class="confirm-btn">Confirmer</button>
-                <button id="cancelActionButton" class="cancel-btn" onclick="closeActionModal()">Annuler</button>
-            </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Friends Location. Tous droits réservés.</p>
         </div>
-    </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="admin-script.js"></script>
 </body>
 </html>
