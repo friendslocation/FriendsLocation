@@ -52,7 +52,7 @@ function calculateDuration(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 pour inclure le jour de début
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // +1 pour inclure le jour de début
     return diffDays;
 }
 
