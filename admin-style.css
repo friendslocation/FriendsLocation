@@ -1,0 +1,440 @@
+/* Import Google Fonts for a modern look - same as main style */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4CAF50; /* Green */
+    --secondary-color: #FF5722; /* Orange (for cancelled/alert) */
+    --tertiary-color: #2196F3; /* Blue (for pending/action) */
+    --confirmed-color: var(--primary-color); /* Green for confirmed bookings */
+    --pending-color: var(--tertiary-color); /* Blue for pending bookings */
+    --cancelled-color: var(--secondary-color); /* Orange for cancelled bookings */
+    --text-dark: #333;
+    --text-light: #666;
+    --bg-light: #f4f7fa; /* Slightly darker background for admin */
+    --card-bg: #ffffff;
+    --border-light: #e0e0e0;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    box-sizing: border-box;
+    line-height: 1.6;
+}
+
+#admin-dashboard {
+    background-color: var(--card-bg);
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px var(--shadow-light);
+    max-width: 1200px; /* Wider for admin table */
+    width: 100%;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-family: 'Roboto', sans-serif;
+    color: var(--tertiary-color); /* Blue heading for admin */
+    margin-bottom: 30px;
+    font-size: 2.8em;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+h1 i {
+    font-size: 1.2em;
+    color: var(--text-light);
+}
+
+.dashboard-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+label {
+    font-weight: 500;
+    color: var(--text-light);
+    font-size: 1.1em;
+}
+
+select {
+    padding: 12px 20px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 1em;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    background-color: #fefefe;
+    color: var(--text-dark);
+    appearance: none; /* Remove default arrow */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.2H18.4c-4.9%200-9.2%202.2-12.8%206.2-3.6%204-5.4%209.2-5.4%2015.6%200%206.4%201.8%2011.6%205.4%2015.6l128%20127.9c3.6%204%207.8%206.2%2012.8%206.2s9.2-2.2%2012.8-6.2L287%20100.6c3.6-4%205.4-9.2%205.4-15.6%200-6.4-1.8-11.6-5.4-15.6z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px auto;
+    padding-right: 40px; /* Make space for the arrow */
+}
+
+select:focus {
+    border-color: var(--tertiary-color);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+button {
+    background-color: var(--tertiary-color); /* Blue for admin buttons */
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+button:hover {
+    background-color: #1976D2;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.5);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+}
+
+.loading-spinner {
+    font-size: 1.6em;
+    color: var(--tertiary-color);
+    margin: 30px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+.loading-spinner i {
+    margin-right: 12px;
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#bookingsList {
+    margin-top: 30px;
+}
+
+.booking-card {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px var(--shadow-light);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 8px solid; /* Thicker border for status */
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for responsiveness */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px var(--shadow-hover);
+}
+
+.booking-details {
+    flex: 2; /* Takes more space */
+    min-width: 250px;
+}
+
+.booking-details p {
+    margin: 8px 0;
+    font-size: 1.05em;
+    color: var(--text-light);
+}
+
+.booking-details p strong {
+    color: var(--text-dark);
+}
+
+.booking-details p.vehicle-info {
+    font-weight: 600;
+    font-size: 1.15em;
+    color: var(--tertiary-color);
+    margin-bottom: 10px;
+}
+
+.booking-status-tag {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9em;
+    margin-left: 10px;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.booking-status-tag.pending_confirmation {
+    background-color: #e3f2fd; /* Light blue */
+    color: var(--pending-color);
+}
+
+.booking-status-tag.confirmed {
+    background-color: #e8f5e9; /* Light green */
+    color: var(--confirmed-color);
+}
+
+.booking-status-tag.cancelled {
+    background-color: #ffebee; /* Light red */
+    color: var(--cancelled-color);
+}
+
+.booking-actions {
+    flex: 1; /* Takes less space */
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end; /* Align buttons to the right */
+}
+
+.action-button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; /* Make action buttons full width within their container */
+    max-width: 180px; /* Limit max width */
+}
+
+.action-button.confirm {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+.action-button.confirm:hover {
+    background-color: #43a047;
+    transform: translateY(-1px);
+}
+
+.action-button.cancel {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 3px 10px rgba(255, 87, 34, 0.3);
+}
+.action-button.cancel:hover {
+    background-color: #e64a19;
+    transform: translateY(-1px);
+}
+
+.message {
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 30px;
+    font-size: 1.15em;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.message.info {
+    background-color: #e3f2fd;
+    color: #2196F3;
+    border: 1px solid #90caf9;
+}
+
+.message.warning {
+    background-color: #fff3e0;
+    color: #ff9800;
+    border: 1px solid #ffcc80;
+}
+
+.message.error {
+    background-color: #ffebee;
+    color: #f44336;
+    border: 1px solid #ef9a9a;
+}
+
+/* --- Modal Styles (reused from main app but adapted) --- */
+.modal-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px; /* Slightly smaller modal for actions */
+    position: relative;
+    text-align: center; /* Center content in action modal */
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 2.2em;
+    font-weight: 300;
+    cursor: pointer;
+    color: var(--text-light);
+    transition: color 0.2s ease;
+}
+
+.close-button:hover {
+    color: var(--secondary-color);
+}
+
+.modal-content h2 {
+    text-align: center;
+    font-size: 2.2em;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: var(--tertiary-color);
+}
+.modal-content h2::after {
+    background-color: var(--tertiary-color);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.modal-buttons .confirm-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+.modal-buttons .confirm-btn:hover {
+    background-color: #43a047;
+}
+
+.modal-buttons .cancel-btn {
+    background-color: #ccc;
+    color: var(--text-dark);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+.modal-buttons .cancel-btn:hover {
+    background-color: #bbb;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #admin-dashboard {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 2.2em;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .dashboard-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    select, button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .booking-card {
+        flex-direction: column;
+        align-items: flex-start; /* Align text left */
+    }
+    .booking-actions {
+        width: 100%;
+        align-items: center; /* Center buttons */
+        margin-top: 20px;
+    }
+    .action-button {
+        max-width: none; /* Remove max-width on small screens */
+    }
+    .modal-content {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8em;
+    }
+    .message {
+        font-size: 1em;
+        padding: 15px;
+    }
+}
