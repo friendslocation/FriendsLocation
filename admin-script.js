@@ -44,15 +44,15 @@ function hideLoading(element) {
 }
 
 function displayMessage(container, message, type = 'info') {
-    container.innerHTML = `<div class="message <span class="math-inline">\{type\}"\></span>{message}</div>`;
+    container.innerHTML = `<div class="message ${type}">${message}</div>`;
 }
 
-// Fonction pour calculer la durée en jours (Correction appliquée ici)
+// Fonction pour calculer la durée en jours
 function calculateDuration(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Correction: retiré le +1
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
 }
 
@@ -69,7 +69,6 @@ async function fetchVehicles() {
         renderVehicles(data);
     } catch (error) {
         console.error('Error fetching vehicles:', error.message);
-        // Note: 'vehicleList' might not exist, ensure you have a container for messages or use a general one
         displayMessage(vehiclesTableBody.parentNode, `Erreur lors du chargement des véhicules: ${error.message}`, 'error');
     } finally {
         hideLoading(loadingVehicles);
@@ -83,7 +82,7 @@ async function fetchRentals() {
 
         const filterDate = filterDateInput.value;
         if (filterDate) {
-            query = query.or(`start_date.lte.<span class="math-inline">\{filterDate\},end\_date\.gte\.</span>{filterDate}`);
+            query = query.or(`start_date.lte.${filterDate},end_date.gte.${filterDate}`);
         }
 
         const filterStatus = filterStatusSelect.value;
@@ -96,7 +95,6 @@ async function fetchRentals() {
         renderReservations(data);
     } catch (error) {
         console.error('Error fetching rentals:', error.message);
-        // Note: 'reservationList' might not exist, ensure you have a container for messages or use a general one
         displayMessage(reservationsTableBody.parentNode, `Erreur lors du chargement des réservations: ${error.message}`, 'error');
     } finally {
         hideLoading(loadingReservations);
@@ -122,8 +120,8 @@ function renderVehicles(vehicles) {
         row.insertCell().textContent = vehicle.status;
         const actionsCell = row.insertCell();
         actionsCell.innerHTML = `
-            <button class="edit-btn" data-id="<span class="math-inline">\{vehicle\.id\}"\><i class\="fas fa\-edit"\></i\> Modifier</button\>
-<button class\="delete\-btn" data\-id\="</span>{vehicle.id}"><i class="fas fa-trash"></i> Supprimer</button>
+            <button class="edit-btn" data-id="${vehicle.id}"><i class="fas fa-edit"></i> Modifier</button>
+            <button class="delete-btn" data-id="${vehicle.id}"><i class="fas fa-trash"></i> Supprimer</button>
         `;
     });
     addVehicleEventListeners();
@@ -140,14 +138,10 @@ async function renderReservations(rentals) {
         return;
     }
 
-    // Récupérer tous les véhicules une seule fois pour optimiser
     if (allVehiclesData.length === 0) {
-        // Tente de charger les véhicules si ce n'est pas déjà fait
         await fetchVehicles();
-        // Si après fetchVehicles, il n'y a toujours pas de données de véhicules, on ne peut pas calculer les prix
         if (allVehiclesData.length === 0) {
              console.warn('Aucune donnée de véhicule disponible pour calculer les prix des réservations.');
-             // Vous pouvez ajouter un message à l'utilisateur ici si nécessaire
         }
     }
 
@@ -159,8 +153,8 @@ async function renderReservations(rentals) {
         let vehicleDisplay = 'Inconnu';
 
         if (vehicle) {
-            totalPrice = `${(vehicle.daily_price * duration).toFixed(2)} DA`; // Format à 2 décimales
-            vehicleDisplay = `${vehicle.brand} <span class="math-inline">\{vehicle\.model\} \(</span>{vehicle.license_plate})`;
+            totalPrice = `${(vehicle.daily_price * duration).toFixed(2)} DA`;
+            vehicleDisplay = `${vehicle.brand} ${vehicle.model} (${vehicle.license_plate})`;
         } else {
             totalPrice = 'Véhicule introuvable';
         }
@@ -172,7 +166,7 @@ async function renderReservations(rentals) {
         row.insertCell().textContent = rental.start_date;
         row.insertCell().textContent = rental.end_date;
         row.insertCell().textContent = `${duration} jours`;
-        row.insertCell().textContent = totalPrice; // Prix total de la réservation
+        row.insertCell().textContent = totalPrice;
         row.insertCell().textContent = rental.booking_status;
 
         const actionsCell = row.insertCell();
@@ -181,12 +175,11 @@ async function renderReservations(rentals) {
                 <option value="pending_confirmation" ${rental.booking_status === 'pending_confirmation' ? 'selected' : ''}>En attente</option>
                 <option value="confirmed" ${rental.booking_status === 'confirmed' ? 'selected' : ''}>Confirmée</option>
                 <option value="canceled" ${rental.booking_status === 'canceled' ? 'selected' : ''}>Annulée</option>
-                <option value="completed" <span class="math-inline">\{rental\.booking\_status \=\=\= 'completed' ? 'selected' \: ''\}\>Terminée</option\>
-</select\>
-<button class\="delete\-rental\-btn" data\-id\="</span>{rental.id}"><i class="fas fa-trash"></i> Supprimer</button>
+                <option value="completed" ${rental.booking_status === 'completed' ? 'selected' : ''}>Terminée</option>
+            </select>
+            <button class="delete-rental-btn" data-id="${rental.id}"><i class="fas fa-trash"></i> Supprimer</button>
         `;
 
-        // Calcul du revenu total
         if ((rental.booking_status === 'confirmed' || rental.booking_status === 'completed') && vehicle) {
             totalConfirmedRevenue += (vehicle.daily_price * duration);
         }
@@ -195,7 +188,6 @@ async function renderReservations(rentals) {
     totalConfirmedRevenueSpan.textContent = `${totalConfirmedRevenue.toFixed(2)} DA`;
     addReservationEventListeners();
 }
-
 
 // --- Événements et Logique (Ajout/Edition/Suppression) ---
 
@@ -217,29 +209,25 @@ function addVehicleEventListeners() {
     });
 }
 
-// Update Booking Status (Mise à jour avec confirmation visuelle directe)
 async function updateBookingStatus(rentalId, newStatus) {
-    if (confirm(`Voulez-vous vraiment changer le statut de la réservation <span class="math-inline">\{rentalId\} à "</span>{newStatus}" ?`)) {
+    if (confirm(`Voulez-vous vraiment changer le statut de la réservation ${rentalId} à "${newStatus}" ?`)) {
         try {
             const { data, error } = await supabaseClient
                 .from('rentals')
                 .update({ booking_status: newStatus })
                 .eq('id', rentalId)
-                .select(); // Ajout de .select() pour retourner les données mises à jour
+                .select();
 
             if (error) throw error;
 
             if (data && data.length > 0) {
                 alert('Statut de la réservation mis à jour avec succès !');
-                // Trouver la ligne affectée et mettre à jour son select visuellement
                 const selectElement = reservationsTableBody.querySelector(`.status-select[data-id="${rentalId}"]`);
                 if (selectElement) {
                     selectElement.value = newStatus;
-                    // Mettre à jour le texte directement dans la cellule pour les cas où le select est remplacé par du texte
                     const statusCell = selectElement.closest('td');
                     if (statusCell) {
                         statusCell.textContent = newStatus;
-                        // On doit recréer le select car textContent le supprime
                         const newSelect = document.createElement('select');
                         newSelect.className = 'status-select';
                         newSelect.dataset.id = rentalId;
@@ -249,13 +237,11 @@ async function updateBookingStatus(rentalId, newStatus) {
                             <option value="canceled" ${newStatus === 'canceled' ? 'selected' : ''}>Annulée</option>
                             <option value="completed" ${newStatus === 'completed' ? 'selected' : ''}>Terminée</option>
                         `;
-                        statusCell.innerHTML = ''; // Vide l'ancien texte
-                        statusCell.appendChild(newSelect); // Ajoute le nouveau select
-                        // Réattacher l'event listener au nouveau select
+                        statusCell.innerHTML = '';
+                        statusCell.appendChild(newSelect);
                         newSelect.onchange = (e) => updateBookingStatus(e.target.dataset.id, e.target.value);
                     }
                 }
-                // Recharger toutes les réservations pour recalculer le revenu total et rafraîchir complètement
                 fetchRentals();
             } else {
                 alert('Mise à jour du statut : aucune modification appliquée ou donnée non trouvée.');
@@ -268,7 +254,6 @@ async function updateBookingStatus(rentalId, newStatus) {
 }
 
 
-// Delete Rental
 async function deleteRental(rentalId) {
     if (confirm(`Voulez-vous vraiment supprimer la réservation ${rentalId} ? Cette action est irréversible.`)) {
         try {
@@ -278,7 +263,7 @@ async function deleteRental(rentalId) {
                 .eq('id', rentalId);
             if (error) throw error;
             alert('Réservation supprimée !');
-            fetchRentals(); // Recharger les réservations
+            fetchRentals();
         } catch (error) {
             console.error('Error deleting rental:', error.message);
             alert(`Échec de la suppression: ${error.message}`);
@@ -290,3 +275,204 @@ async function deleteRental(rentalId) {
 addVehicleBtn.onclick = () => {
     modalTitle.textContent = 'Ajouter un nouveau véhicule';
     vehicleForm.reset();
+    vehicleIdInput.value = '';
+    vehicleModal.style.display = 'flex';
+};
+
+closeButton.onclick = () => {
+    vehicleModal.style.display = 'none';
+};
+
+window.onclick = (event) => {
+    if (event.target === vehicleModal) {
+        vehicleModal.style.display = 'none';
+    }
+};
+
+vehicleForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const id = vehicleIdInput.value;
+    const vehicleData = {
+        brand: brandInput.value,
+        model: modelInput.value,
+        license_plate: licensePlateInput.value,
+        type: typeInput.value,
+        daily_price: parseFloat(dailyPriceInput.value),
+        status: statusInput.value
+    };
+
+    try {
+        if (id) {
+            const { error } = await supabaseClient
+                .from('vehicles')
+                .update(vehicleData)
+                .eq('id', id);
+            if (error) throw error;
+            alert('Véhicule mis à jour !');
+        } else {
+            const { error } = await supabaseClient
+                .from('vehicles')
+                .insert([vehicleData]);
+            if (error) throw error;
+            alert('Véhicule ajouté !');
+        }
+        vehicleModal.style.display = 'none';
+        fetchVehicles();
+        fetchRentals();
+    } catch (error) {
+        console.error('Error saving vehicle:', error.message);
+        alert(`Échec de l'enregistrement du véhicule: ${error.message}`);
+    }
+};
+
+async function editVehicle(id) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('vehicles')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error) throw error;
+
+        modalTitle.textContent = 'Modifier Véhicule';
+        vehicleIdInput.value = data.id;
+        brandInput.value = data.brand;
+        modelInput.value = data.model;
+        licensePlateInput.value = data.license_plate;
+        typeInput.value = data.type;
+        dailyPriceInput.value = data.daily_price;
+        statusInput.value = data.status;
+        vehicleModal.style.display = 'flex';
+    } catch (error) {
+        console.error('Error fetching vehicle for edit:', error.message);
+        alert(`Impossible de charger les détails du véhicule: ${error.message}`);
+    }
+}
+
+async function deleteVehicle(id) {
+    if (confirm(`Voulez-vous vraiment supprimer le véhicule ${id} ? Cette action est irréversible.`)) {
+        try {
+            const { data: rentals, error: rentalError } = await supabaseClient
+                .from('rentals')
+                .select('id, booking_status')
+                .eq('vehicle_id', id)
+                .in('booking_status', ['pending_confirmation', 'confirmed']);
+
+            if (rentalError) throw rentalError;
+
+            if (rentals && rentals.length > 0) {
+                alert('Impossible de supprimer ce véhicule. Il a des réservations actives ou en attente.');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('vehicles')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            alert('Véhicule supprimé !');
+            fetchVehicles();
+        } catch (error) {
+            console.error('Error deleting vehicle:', error.message);
+            alert(`Échec de la suppression du véhicule: ${error.message}`);
+        }
+    }
+}
+
+// --- Fonctions de filtrage ---
+filterDateInput.onchange = fetchRentals;
+filterStatusSelect.onchange = fetchRentals;
+resetFiltersBtn.onclick = () => {
+    filterDateInput.value = '';
+    filterStatusSelect.value = '';
+    fetchRentals();
+};
+
+// --- Fonction d'impression de rapport ---
+printReportBtn.onclick = () => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Rapport des Réservations Friends Location</title>');
+    printWindow.document.write('<link rel="stylesheet" href="style.css">');
+    printWindow.document.write('<link rel="stylesheet" href="admin-style.css">');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .print-header { text-align: center; margin-bottom: 30px; }
+        .print-header h1 { color: #333; }
+        .print-section { margin-bottom: 40px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
+        .print-section h2, .print-section h3 { color: #555; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .revenue-summary { text-align: right; margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+        .filter-controls, .button-group, .actions-cell, .status-select, .delete-rental-btn, .edit-btn, .delete-btn {
+            display: none !important;
+        }
+        th:nth-child(1), td:nth-child(1) { width: 5%; }
+        th:nth-child(2), td:nth-child(2) { width: 20%; }
+        th:nth-child(3), td:nth-child(3) { width: 15%; }
+        th:nth-child(4), td:nth-child(4) { width: 15%; }
+        th:nth-child(5), td:nth-child(5) { width: 8%; }
+        th:nth-child(6), td:nth-child(6) { width: 8%; }
+        th:nth-child(7), td:nth-child(7) { width: 5%; }
+        th:nth-child(8), td:nth-child(8) { width: 10%; }
+        th:nth-child(9), td:nth-child(9) { width: 8%; }
+    `);
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+
+    printWindow.document.write('<div class="print-header"><h1>Rapport des Réservations Friends Location</h1></div>');
+
+    printWindow.document.write('<div class="print-section">');
+    printWindow.document.write(`<h2>Résumé des Revenus</h2>`);
+    printWindow.document.write(`<div class="revenue-summary">Revenu Total des Locations Terminées/Confirmées : ${totalConfirmedRevenueSpan.textContent}</div>`);
+    printWindow.document.write('</div>');
+
+    printWindow.document.write('<div class="print-section">');
+    printWindow.document.write(`<h2>Détail des Réservations (${reservationsTableBody.children.length} entrées)</h2>`);
+    printWindow.document.write('<table>');
+    printWindow.document.write('<thead>' + document.querySelector('#reservationList table thead').innerHTML + '</thead>');
+    printWindow.document.write('<tbody>' + reservationsTableBody.innerHTML + '</tbody>');
+    printWindow.document.write('</table>');
+    printWindow.document.write('</div>');
+
+    printWindow.document.write('<div class="print-section">');
+    printWindow.document.write(`<h2>Liste des Véhicules (${vehiclesTableBody.children.length} entrées)</h2>`);
+    printWindow.document.write('<table>');
+    printWindow.document.write('<thead>' + document.querySelector('#vehicleList table thead').innerHTML + '</thead>');
+    printWindow.document.write('<tbody>' + vehiclesTableBody.innerHTML + '</tbody>');
+    printWindow.document.write('</table>');
+    printWindow.document.write('</div>');
+
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+
+    printWindow.onload = function() {
+        printWindow.focus();
+        printWindow.print();
+    };
+};
+
+// --- Initialisation ---
+async function initializeAdminApp() {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+
+    script.onload = async () => {
+        console.log('Supabase JS SDK loaded successfully.');
+        // Initialiser le client Supabase APRÈS que le SDK soit chargé
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        await fetchVehicles(); // Charger les véhicules en premier
+        fetchRentals(); // Puis charger les réservations
+    };
+
+    script.onerror = () => {
+        console.error('Failed to load Supabase JS SDK. Check your internet connection or the script URL.');
+        displayMessage(document.body, 'Échec du chargement des composants. Veuillez vérifier votre connexion Internet.', 'error');
+    };
+    document.head.appendChild(script);
+}
+
+initializeAdminApp();
